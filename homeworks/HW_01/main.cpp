@@ -3,6 +3,7 @@
 #include <Eigen/Eigen>
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <cmath>
 
 constexpr double MY_PI = 3.1415926;
 
@@ -22,7 +23,10 @@ Eigen::Matrix4f get_view_matrix(Eigen::Vector3f eye_pos)
 Eigen::Matrix4f get_model_matrix(float rotation_angle)
 {
     Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
-
+    model(0,0) = cosf(rotation_angle);
+    model(0,1) = -sinf(rotation_angle);
+    model(1,0) = sinf(rotation_angle);
+    model(1,1) = cosf(rotation_angle);
     // TODO: Implement this function
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
