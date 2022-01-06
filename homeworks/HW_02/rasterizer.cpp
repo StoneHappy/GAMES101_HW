@@ -45,7 +45,7 @@ static bool insideTriangle(int x, int y, const Vector3f* _v)
     // initial vector PA PB PC
     Vector3f PA, PB, PC;
     Vector3f P, A, B, C;
-    P << x, y, 0;
+    P << (float)x+0.5, (float)y+0.5, 0;
     A = _v[0];
     B = _v[1];
     C = _v[2];
