@@ -43,25 +43,26 @@ auto to_vec4(const Eigen::Vector3f& v3, float w = 1.0f)
 static bool insideTriangle(int x, int y, const Vector3f* _v)
 {   
     // initial vector PA PB PC
-    Vector3f PA, PB, PC;
+    Vector3f AB, BC, CA, AP, BP, CP;
     Vector3f P, A, B, C;
-    P << (float)x+0.5, (float)y+0.5, 0;
-    A = _v[0];
-    B = _v[1];
-    C = _v[2];
-    PA = A - P;
-    PB = B - P;
-    PC = C - P;
+    P << x, y, 0;
+    A << _v[0].x(), _v[0].y(), _v[0].z();
+    B << _v[1].x(), _v[1].y(), _v[1].z();
+    C << _v[2].x(), _v[2].y(), _v[2].z();
 
-    Vector3f PAcrowdotPB = PA.cross(PB); 
-    Vector3f PBcrowdotPC = PB.cross(PC); 
-    Vector3f PCcrowdotPA = PC.cross(PA); 
+    AB = B - A;
+    BC = C - B;
+    CA = A - C;
+    AP = P - A;
+    BP = P - B;
+    CP = P - C;
 
-    float dot1 = PAcrowdotPB.dot(PBcrowdotPC);
-    float dot2 = PBcrowdotPC.dot(PCcrowdotPA);
+    float z1 = AB.cross(AP).z();
+    float z2 = BC.cross(BP).z();
+    float z3 = CA.cross(CP).z();
+
+    return (z1 > 0 && z2 >0 && z3 > 0) ||  (z1 < 0 && z2 <0 && z3 < 0);
     
-    bool rnt = (dot1*dot2)>0;
-    return rnt;
     // TODO : Implement this function to check if the point (x, y) is inside the triangle represented by _v[0], _v[1], _v[2]
 }
 
