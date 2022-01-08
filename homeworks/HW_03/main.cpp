@@ -246,16 +246,56 @@ Eigen::Vector3f displacement_fragment_shader(const fragment_shader_payload& payl
     // Vector ln = (-dU, -dV, 1)
     // Position p = p + kn * n * h(u,v)
     // Normal n = normalize(TBN * ln)
+    Eigen::Vector3f n;
+    n = normal;
+    float x = n.x(), y = n.y(), z = n.z();
 
+    Eigen::Vector3f t(x*y/sqrt(x*x+z*z),sqrt(x*x+z*z),z*y/sqrt(x*x+z*z));
+    Eigen::Vector3f b;
+    b = n.cross(t);
+    Eigen::Matrix3f TBN;
+    TBN.col(0) = t;
+    TBN.col(1) = b;
+    TBN.col(2) = n;
+
+    float w = payload.texture->width;
+    float h = payload.texture->height;
+    float u = payload.tex_coords.x();
+    float v = payload.tex_coords.y();
+
+    auto huv = payload.texture->getColor(u,v).norm();
+
+    float dU = kh * kn * (payload.texture->getColor(u+1.0f/w,v).norm()-huv);
+    float dV = kh * kn * (payload.texture->getColor(u,v+1.0f/h).norm()-huv);
+
+    Vector3f ln(-dU,-dV,1);
+
+    normal = (TBN * ln).normalized();
 
     Eigen::Vector3f result_color = {0, 0, 0};
 
+    Eigen::Vector3f ambient = {0, 0, 0}, diffuse = {0, 0, 0}, specular = {0, 0, 0};
     for (auto& light : lights)
     {
+        float rr =  ( light.position -point).squaredNorm();
+        Eigen::Vector3f l = (light.position - point).normalized();
+        Eigen::Vector3f n = normal;
+        Eigen::Vector3f v = (eye_pos - point).normalized();
+        Eigen::Vector3f h = (l + v).normalized();
+
+        // diffuse
+        for (size_t i = 0; i < 3; i++)
+        {
+            float intensity = light.intensity[i]/rr;
+            diffuse[i] = kd[i] * intensity * MAX(0, l.dot(n));
+            specular[i] = ks[i] * intensity * pow(MAX(0, n.dot(h)), p);
+            ambient[i] = ka[i] * amb_light_intensity[i];
+        }
+        
+        result_color = diffuse + specular + ambient;
         // TODO: For each light source in the code, calculate what the *ambient*, *diffuse*, and *specular* 
         // components are. Then, accumulate that result on the *result_color* object.
-
-
+        
     }
 
     return result_color * 255.f;
