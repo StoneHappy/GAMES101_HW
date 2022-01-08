@@ -5,3 +5,4 @@ find_package( OpenCV REQUIRED )
 
 add_subdirectory(homeworks/HW_01)
 add_subdirectory(homeworks/HW_02)
+add_subdirectory(homeworks/HW_03)
